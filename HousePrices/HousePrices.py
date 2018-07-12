@@ -1,10 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn import preprocessing
+import numpy as np
 pd.set_option('display.width', 1000)
 data_train=pd.read_csv('/Users/yiliu/lllyeeData/all/train.csv')
-print(data_train)
-print(data_train['SalePrice'].describe())
+#print(data_train)
+#print(data_train['SalePrice'].describe())
 sns.distplot(data_train['SalePrice'])#kde=False去掉曲线
 
 '''
@@ -46,8 +48,32 @@ var = 'Neighborhood'
 data = pd.concat([data_train['SalePrice'], data_train[var]], axis=1)
 f, ax = plt.subplots(figsize=(26, 12))
 fig = sns.boxplot(x=var, y="SalePrice", data=data)
-fig.axis(ymin=0, ymax=800000)'''
+fig.axis(ymin=0, ymax=800000)
 corrmat = data_train.corr()#协方差
 f, ax = plt.subplots(figsize=(20, 9))
 sns.heatmap(corrmat, vmax=0.8, square=True)
-plt.show()
+
+f_names = ['CentralAir', 'Neighborhood']
+for x in f_names:
+    label = preprocessing.LabelEncoder()
+    data_train[x] = label.fit_transform(data_train[x])#将标签标准化
+corrmat = data_train.corr()
+f, ax = plt.subplots(figsize=(20, 9))
+sns.heatmap(corrmat, vmax=0.8, square=True)
+corrmat = data_train.corr()#相关系数
+#print(corrmat)
+f, ax = plt.subplots(figsize=(20, 9))
+sns.heatmap(corrmat, vmax=0.8, square=True)
+k  = 10 # 关系矩阵中将显示10个特征
+cols = corrmat.nlargest(k, 'SalePrice')['SalePrice'].index#k是截取的行数
+cm = np.corrcoef(data_train[cols].values.T)#corrcoef是求每个数组的相关系数
+print(data_train[cols].values.T)
+#print(cm)
+sns.set(font_scale=1.25)
+hm = sns.heatmap(cm, cbar=True, annot=True, \
+                 square=True, fmt='.2f', annot_kws={'size': 10}, yticklabels=cols.values, xticklabels=cols.values)
+
+sns.set()
+cols = ['SalePrice','OverallQual','GrLivArea', 'GarageCars','TotalBsmtSF', 'FullBath', 'TotRmsAbvGrd', 'YearBuilt']
+sns.pairplot(data_train[cols], size = 2.5)
+plt.show()'''
